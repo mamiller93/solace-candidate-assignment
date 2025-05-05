@@ -2,6 +2,7 @@
 
 import { AdvocatesType } from "@/db/schema";
 import { ChangeEvent, useEffect, useState } from "react";
+import Fuse from "fuse.js";
 
 export default function Home() {
   const [advocates, setAdvocates] = useState<Array<AdvocatesType>>([]);
@@ -27,16 +28,20 @@ export default function Home() {
       console.error("Element with id 'search-term' not found");
     }
 
-    console.log("filtering advocates...");
-    const filteredAdvocates = advocates.filter((advocate) => {
-      return (
-        advocate.firstName.includes(searchTerm) ||
-        advocate.lastName.includes(searchTerm) ||
-        advocate.city.includes(searchTerm) ||
-        advocate.degree.includes(searchTerm) ||
-        advocate.specialties.includes(searchTerm) ||
-        advocate.yearsOfExperience.toString().includes(searchTerm)
-      );
+    const filteredAdvocates = new Fuse(advocates, {
+      keys: [
+        "firstName",
+        "lastName",
+        "city",
+        "degree",
+        "specialties",
+        "yearsOfExperience",
+        "phoneNumber",
+      ],
+      includeScore: true,
+      threshold: 0.3,
+    }).search(searchTerm).map((result) => {
+      return result.item;
     });
 
     setFilteredAdvocates(filteredAdvocates);
