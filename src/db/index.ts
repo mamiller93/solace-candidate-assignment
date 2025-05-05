@@ -8,6 +8,21 @@ const setup = () => {
       select: () => ({
         from: () => [],
       }),
+      insert: () => ({
+        values: () => ({
+          returning: () => [],
+        }),
+      }),
+      update: () => ({
+        set: () => ({
+          where: () => [],
+        }),
+      }),
+      delete: () => ({
+        from: () => ({
+          where: () => [],
+        }),
+      }),
     };
   }
 

@@ -1,10 +1,11 @@
 "use client";
 
+import { AdvocatesType } from "@/db/schema";
 import { ChangeEvent, useEffect, useState } from "react";
 
 export default function Home() {
-  const [advocates, setAdvocates] = useState([]);
-  const [filteredAdvocates, setFilteredAdvocates] = useState([]);
+  const [advocates, setAdvocates] = useState<Array<AdvocatesType>>([]);
+  const [filteredAdvocates, setFilteredAdvocates] = useState<Array<AdvocatesType>>([]);
 
   useEffect(() => {
     console.log("fetching advocates...");
