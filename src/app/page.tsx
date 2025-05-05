@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 
 export default function Home() {
   const [advocates, setAdvocates] = useState([]);
@@ -16,7 +16,7 @@ export default function Home() {
     });
   }, []);
 
-  const onChange = (e) => {
+  const onChange = (e: ChangeEvent<HTMLInputElement>) => {
     const searchTerm = e.target.value;
 
     document.getElementById("search-term").innerHTML = searchTerm;
