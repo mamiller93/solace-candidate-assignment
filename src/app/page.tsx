@@ -1,70 +1,70 @@
 "use client";
 
+import { useEffect, useState, useCallback, ChangeEvent } from "react";
+import { loadAdvocates } from "@/app/api/advocates/loadAdvocates";
 import { AdvocatesType } from "@/db/schema";
-import { ChangeEvent, useEffect, useState } from "react";
-import Fuse from "fuse.js";
+import debounce from "lodash/debounce";
 import AdvocateTable from "@/app/components/advocate-table";
 
 export default function Home() {
-  const [advocates, setAdvocates] = useState<Array<AdvocatesType>>([]);
-  const [filteredAdvocates, setFilteredAdvocates] = useState<Array<AdvocatesType>>([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [advocates, setAdvocates] = useState<AdvocatesType[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    console.log("fetching advocates...");
-    fetch("/api/advocates").then((response) => {
-      response.json().then((jsonResponse) => {
-        setAdvocates(jsonResponse.data);
-        setFilteredAdvocates(jsonResponse.data);
-      });
-    });
-  }, []);
-
-  const onChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const searchTerm = e.target.value;
-
-    const searchTermElement = document.getElementById("search-term");
-    if (searchTermElement) {
-      searchTermElement.innerHTML = searchTerm;
-    } else {
-      console.error("Element with id 'search-term' not found");
+  const fetchAndSetAdvocates = async (term: string) => {
+    setIsLoading(true);
+    try {
+      const results = await loadAdvocates(term);
+      setAdvocates(results);
+    } catch (err) {
+      console.error("Failed to load advocates", err);
+    } finally {
+      setIsLoading(false);
     }
-
-    const filteredAdvocates = new Fuse(advocates, {
-      keys: [
-        "firstName",
-        "lastName",
-        "city",
-        "degree",
-        "specialties",
-        "yearsOfExperience",
-        "phoneNumber",
-      ],
-      includeScore: true,
-      threshold: 0.3,
-    }).search(searchTerm).map((result) => {
-      return result.item;
-    });
-
-    setFilteredAdvocates(filteredAdvocates);
   };
 
-  const onClick = () => {
-    console.log(advocates);
-    setFilteredAdvocates(advocates);
+  const debouncedFetch = useCallback(
+    debounce((term: string) => {
+      fetchAndSetAdvocates(term);
+    }, 300),
+    []
+  );
+
+  useEffect(() => {
+    debouncedFetch(searchTerm);
+  }, [searchTerm, debouncedFetch]);
+
+  const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const term = e.target.value;
+    setSearchTerm(term);
+  };
+
+  const handleReset = () => {
+    setSearchTerm("");
   };
 
   return (
-    <main className="m-6">
-      <h1 className="pb">Solace Advocates</h1>
-      <br />
-      <br />
+    <main className="m-6 flex flex-col gap-6">
+      <h1 className="text-xl font-semibold">Solace Advocates</h1>
+
       <div>
-        <p>Search</p>
-        <p>
-          Searching for: <span id="search-term"></span>
-        </p>
-        <input className="border border-black" onChange={onChange} />
-        <button className="" onClick={onClick}>Reset Search</button>
+        <p className="text-lg">Search</p>
+        <div className="flex gap-2">
+          <label className="flex grow-0 items-center gap-1 text-sm text-gray-500">
+            <span className="shrink-0">Search for:</span>
+            <input
+              className="w-full border border-teal-800 rounded focus:outline-none py-1.5 px-2 focus-visible:ring-1 ring-teal-800"
+              value={searchTerm}
+              onChange={handleSearchChange}
+            />
+          </label>
+          <button
+            className="shrink-0 bg-teal-800 outline-none text-white py-1.5 px-3 rounded hover:bg-teal-900 focus-visible:bg-teal-900"
+            onClick={handleReset}
+          >
+            Reset Search
+          </button>
+        </div>
       </div>
 
       <AdvocateTable isLoading={isLoading} items={advocates} />
