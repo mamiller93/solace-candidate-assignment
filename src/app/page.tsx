@@ -3,6 +3,7 @@
 import { AdvocatesType } from "@/db/schema";
 import { ChangeEvent, useEffect, useState } from "react";
 import Fuse from "fuse.js";
+import AdvocateTable from "@/app/components/advocate-table";
 
 export default function Home() {
   const [advocates, setAdvocates] = useState<Array<AdvocatesType>>([]);
@@ -65,40 +66,8 @@ export default function Home() {
         <input className="border border-black" onChange={onChange} />
         <button className="" onClick={onClick}>Reset Search</button>
       </div>
-      <br />
-      <br />
-      <table>
-        <thead>
-          <tr>
-            <th>First Name</th>
-            <th>Last Name</th>
-            <th>City</th>
-            <th>Degree</th>
-            <th>Specialties</th>
-            <th>Years of Experience</th>
-            <th>Phone Number</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filteredAdvocates.map((advocate, i) => {
-            return (
-              <tr key={i}>
-                <td>{advocate.firstName}</td>
-                <td>{advocate.lastName}</td>
-                <td>{advocate.city}</td>
-                <td>{advocate.degree}</td>
-                <td>
-                  {advocate.specialties.map((s, i) => (
-                    <div key={i}>{s}</div>
-                  ))}
-                </td>
-                <td>{advocate.yearsOfExperience}</td>
-                <td>{advocate.phoneNumber}</td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+
+      <AdvocateTable isLoading={isLoading} items={advocates} />
     </main>
   );
 }
